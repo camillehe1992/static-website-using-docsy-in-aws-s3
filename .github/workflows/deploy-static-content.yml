@@ -12,25 +12,27 @@ env:
   AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
 
 jobs:
-  Build_and_Deploy:
+  build-and-deploy:
+    name: Build and Deploy
     runs-on: ubuntu-18.04
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    # Sets up Hugo
-    - name: Setup Hugo
-    uses: peaceiris/actions-hugo@v2
-    with:
-        hugo-version: '0.63.2'
+      # Sets up Hugo
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.63.2'
 
-    # Builds repo
-    - name: Build
-      run: hugo --minify
+      # Builds repo
+      - name: Build
+        run: hugo --minify
 
-    # Deploys built website to S3
-    - name: Deploy to S3
-      run: hugo deploy --force
-      env:
-        AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      # Deploys built website to S3
+      - name: Deploy to S3
+        run: hugo deploy --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
