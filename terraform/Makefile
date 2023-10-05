@@ -12,13 +12,14 @@ MAKE ?= make
 AWS_PROFILE := app-deployer
 VAR_FILE := $(BASE)/tf_$(ENVIRONMENT).tfvars
 
-$(info AWS_ACCOUNT 		= $(AWS_ACCOUNT))
-$(info AWS_REGION  		= $(AWS_REGION))
-$(info STATE_BUCKET		= $(STATE_BUCKET))
-$(info ENVIRONMENT 		= $(ENVIRONMENT))
-$(info NICKNAME    		= $(NICKNAME))
-$(info AWS_PROFILE 		= $(AWS_PROFILE))
-$(info VAR_FILE 		= $(VAR_FILE))
+$(info AWS_ACCOUNT 			= $(AWS_ACCOUNT))
+$(info AWS_REGION  			= $(AWS_REGION))
+$(info STATE_BUCKET			= $(STATE_BUCKET))
+$(info ENVIRONMENT 			= $(ENVIRONMENT))
+$(info NICKNAME    			= $(NICKNAME))
+$(info AWS_PROFILE 			= $(AWS_PROFILE))
+$(info VAR_FILE 			= $(VAR_FILE))
+$(info STATIC_BUCKET_NAME 	= $(STATIC_BUCKET_NAME))
 
 lint:
 	$(info [*] Linting terraform)
@@ -41,13 +42,14 @@ plan: init
 	@$(TF) plan -var-file $(VAR_FILE) \
 		-var="aws_profile=${AWS_PROFILE}" \
 		-var="aws_region=${AWS_REGION}" \
+		-var="static_bucket_name=${STATIC_BUCKET_NAME}" \
 		-out tfplan
 
 plan-destroy: init
 	$(info [*] Plan Terrafrom Infra - Destroy)
 	@$(TF) plan -destroy -var-file $(VAR_FILE) \
 		-var="aws_profile=${AWS_PROFILE}" \
-		-var="aws_region=${AWS_REGION}" \
+		-var="static_bucket_name=${STATIC_BUCKET_NAME}" \
 		-out tfplan
 
 apply: plan

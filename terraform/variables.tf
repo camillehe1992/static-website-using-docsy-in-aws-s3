@@ -21,15 +21,7 @@ variable "tags" {
 }
 
 # Project Specific Variables
-
-variable "bucket_name_prefix" {
+variable "static_bucket_name" {
   type        = string
-  default     = "s3-website"
-  description = "The prefix name of S3 bucket for static website hosting"
-}
-
-variable "bucket_name_suffix" {
-  type        = string
-  default     = "portal.com"
-  description = "The suffix name of S3 bucket for static website hosting"
+  description = "The name of S3 bucket for static website hosting"
 }

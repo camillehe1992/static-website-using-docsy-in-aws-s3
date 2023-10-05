@@ -1,3 +1,3 @@
 locals {
-  bucket_name = var.env != "prod" ? "${var.bucket_name_prefix}.${var.env}.${var.bucket_name_suffix}" : "${var.bucket_name_prefix}.${var.bucket_name_suffix}"
+  bucket_name = var.env != "prod" ? "${var.static_bucket_name}.${var.env}" : "${var.static_bucket_name}"
 }
