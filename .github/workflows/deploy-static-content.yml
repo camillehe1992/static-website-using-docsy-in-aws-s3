@@ -17,6 +17,7 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-22.04
+    environment: dev
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
