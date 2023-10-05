@@ -33,6 +33,7 @@ env:
   AWS_ACCOUNT: "${{ vars.AWS_ACCOUNT }}"
   AWS_REGION: "${{ vars.AWS_REGION }}"
   STATE_BUCKET: "${{ vars.STATE_BUCKET }}"
+  STATIC_BUCKET_NAME: "${{ vars.STATIC_BUCKET_NAME }}"
   ENVIRONMENT: "${{ inputs.environment }}"
   NICKNAME: s3staticwebsite
   WORKING_DIRECTORY: terraform
@@ -91,6 +92,7 @@ jobs:
           export exitcode=0
           terraform plan -var-file $(pwd)/tf_$ENVIRONMENT.tfvars \
           -var="aws_region=$AWS_REGION" \
+          -var="static_bucket_name=${STATIC_BUCKET_NAME}" \
           -detailed-exitcode -no-color -out tfplan || export exitcode=$?
 
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
@@ -110,6 +112,7 @@ jobs:
           export exitcode=0
           terraform plan -destroy -var-file $(pwd)/tf_$ENVIRONMENT.tfvars \
           -var="aws_region=$AWS_REGION" \
+          -var="static_bucket_name=${STATIC_BUCKET_NAME}" \
           -detailed-exitcode -no-color -out tfplan || export exitcode=$?
 
           echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
