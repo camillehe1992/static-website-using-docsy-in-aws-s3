@@ -231,3 +231,9 @@ enable = false
   [[module.imports]]
     path = "github.com/google/docsy/dependencies"
     disable = false
+
+# Upload the static website docs into S3 bucket
+[deployment]
+[[deployment.targets]]
+name = "aws"
+URL = "s3://s3-website.dev.portal.com"
