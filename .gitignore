@@ -2,7 +2,3 @@
 resources/
 node_modules/
 .hugo_build.lock
-
-terraform/.terraform/
-terraform/.env
-terraform/tfplan
