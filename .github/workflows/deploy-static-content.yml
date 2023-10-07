@@ -58,7 +58,6 @@ jobs:
         id: build-and-output
         run: |
           HUGO_BUILD=$(hugo --gc --minify)
-
           URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com"
           
           if [ $GITHUB_REF -ne "refs/heads/main" ]; then
