@@ -49,7 +49,7 @@ jobs:
 
       # Deploys built website to S3
       - name: Deploy to S3
-        run: hugo deploy --force
+        run: hugo deploy --target=aws --force
         env:
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
