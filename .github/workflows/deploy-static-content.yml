@@ -59,9 +59,12 @@ jobs:
         run: |
           HUGO_BUILD=$(hugo --gc --minify)
           URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com"
-          
-          if [ $GITHUB_REF -ne "refs/heads/main" ]; then
-            URL = $URL + "/staging"
+
+          echo $GITHUB_REF
+
+          if [ "$GITHUB_REF" != "refs/heads/main" ]
+          then
+                URL = $URL + "/staging"
           fi
 
           delimiter="$(openssl rand -hex 8)"
@@ -69,7 +72,7 @@ jobs:
           echo "Validate static website at $URL" >> $GITHUB_OUTPUT
           echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
-          echo '```terraform' >> $GITHUB_OUTPUT
+          echo '```bash' >> $GITHUB_OUTPUT
           echo "$HUGO_BUILD" >> $GITHUB_OUTPUT
           echo '```' >> $GITHUB_OUTPUT
           echo "</details>" >> $GITHUB_OUTPUT
