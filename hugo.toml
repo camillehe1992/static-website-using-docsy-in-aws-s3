@@ -232,8 +232,13 @@ enable = false
     path = "github.com/google/docsy/dependencies"
     disable = false
 
-# Upload the static website docs into S3 bucket
+# Hugo deployment configuration
+
 [deployment]
 [[deployment.targets]]
+name = "aws-pre"
+url = "s3://camille-s3-website/staging"
+
+[[deployment.targets]]
 name = "aws"
-URL = "s3://camille-s3-website"
+url = "s3://camille-s3-website"

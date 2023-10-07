@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 env:
   AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -43,12 +46,62 @@ jobs:
       
       - name: Package
         run: npm ci
-      # Builds repo
+      
+      # Builds repo and create string output of hugo
       - name: Build
-        run: hugo --minify
+        id: build-and-output
+        run: |
+          HUGO_BUILD=$(hugo --gc --minify)
+          STAGING_URL=$(hugo config | grep "aws-pre" -C 1 | tail -1)
 
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "Validate S3 static website at >> $GITHUB_OUTPUT
+          echo "$STAGING_URL" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```terraform' >> $GITHUB_OUTPUT
+          echo "$HUGO_BUILD" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+      
+      # Publish Hugo Output as task summary
+      - name: Publish Hugo Output to Task Summary
+        env:
+          SUMMARY: ${{ steps.build-and-output.outputs.summary }}
+        run: |
+          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+      
+      # If this is a PR post the changes
+      - name: Push Hugo Output to PR
+        if: github.ref != 'refs/heads/main'
+        uses: actions/github-script@v6
+        env:
+          SUMMARY: "${{ steps.build-and-output.outputs.summary }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `${process.env.SUMMARY}`;
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+            })
+      
+      # Deploys built website to S3 staging env for validation
+      - name: Deploy to S3 (Staging)
+        if: github.ref != 'refs/heads/main'
+        run: hugo deploy --target=aws-pre --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+      
       # Deploys built website to S3
       - name: Deploy to S3
+        if: github.ref == 'refs/heads/main'
         run: hugo deploy --target=aws --force
         env:
           AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
