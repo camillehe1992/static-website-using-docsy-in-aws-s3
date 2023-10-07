@@ -236,9 +236,5 @@ enable = false
 
 [deployment]
 [[deployment.targets]]
-name = "aws-pre"
-url = "s3://camille-s3-website/staging"
-
-[[deployment.targets]]
 name = "aws"
 url = "s3://camille-s3-website"

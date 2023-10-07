@@ -60,13 +60,6 @@ jobs:
           HUGO_BUILD=$(hugo --gc --minify)
           URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com"
 
-          echo $GITHUB_REF
-
-          if [ "$GITHUB_REF" != "refs/heads/main" ]
-          then
-                URL = $URL + "/staging"
-          fi
-
           delimiter="$(openssl rand -hex 8)"
           echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
           echo "Validate static website at $URL" >> $GITHUB_OUTPUT
@@ -101,15 +94,6 @@ jobs:
                 repo: context.repo.repo,
                 body: body
             })
-      
-      # Deploys built website to S3 staging env for validation
-      - name: Deploy to S3 (Staging)
-        if: github.ref != 'refs/heads/main'
-        run: hugo deploy --target=aws-pre --force
-        env:
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
       
       # Deploys built website to S3
       - name: Deploy to S3
