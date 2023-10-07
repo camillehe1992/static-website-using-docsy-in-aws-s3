@@ -64,7 +64,7 @@ jobs:
 
           if [ "$GITHUB_REF" != "refs/heads/main" ]
           then
-                URL = $URL + "/staging"
+                URL=$URL + "/staging"
           fi
 
           delimiter="$(openssl rand -hex 8)"
