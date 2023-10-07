@@ -55,7 +55,7 @@ jobs:
         run: |
           HUGO_BUILD=$(hugo --gc --minify)
 
-          URL = http://${env.STATIC_BUCKET_NAME}.s3-website-${env.AWS_REGION}.amazonaws.com
+          def URL="http://${env.STATIC_BUCKET_NAME}.s3-website-${env.AWS_REGION}.amazonaws.com"
           
           if [ $GITHUB_REF -eq "refs/heads/main" ]; then
             URL = $URL + "/staging"
