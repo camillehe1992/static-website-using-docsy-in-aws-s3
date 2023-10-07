@@ -16,6 +16,8 @@ env:
   AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
   AWS_REGION: "${{ vars.AWS_REGION }}"
 
+  STATIC_BUCKET_NAME: camille-s3-website
+
 jobs:
   build-and-deploy:
     name: Build and Deploy
@@ -52,12 +54,16 @@ jobs:
         id: build-and-output
         run: |
           HUGO_BUILD=$(hugo --gc --minify)
-          STAGING_URL=$(hugo config | grep "aws-pre" -C 1 | tail -1)
+
+          URL = http://${env.STATIC_BUCKET_NAME}.s3-website-${env.AWS_REGION}.amazonaws.com
+          
+          if [ $GITHUB_REF -eq "refs/heads/main" ]; then
+            URL = $URL + "/staging"
+          fi
 
           delimiter="$(openssl rand -hex 8)"
           echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-          echo "Validate S3 static website at" >> $GITHUB_OUTPUT
-          echo "$STAGING_URL" >> $GITHUB_OUTPUT
+          echo "Validate static website at $URL" >> $GITHUB_OUTPUT
           echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo '```terraform' >> $GITHUB_OUTPUT
