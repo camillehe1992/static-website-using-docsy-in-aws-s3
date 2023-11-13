@@ -236,5 +236,9 @@ enable = false
 
 [deployment]
 [[deployment.targets]]
+name = "dev"
+url = "s3://docsy-portal-dev"
+
+[[deployment.targets]]
 name = "prod"
 url = "s3://docsy-portal-prod"

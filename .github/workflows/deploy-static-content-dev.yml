@@ -1,0 +1,101 @@
+# This is a basic workflow to help you get started with Actions
+name: Build and Deploy Hugo Site - DEV
+
+# Controls when the action will run. Triggers the workflow on push
+# events but only for the master branch
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+  AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+  AWS_REGION: "${{ vars.AWS_REGION }}"
+  STATIC_BUCKET_NAME: "${{ vars.STATIC_BUCKET_NAME }}"
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-22.04
+    environment: dev
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Sets up Hugo
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          # The action defaults to search for the dependency file (package-lock.json,
+          # npm-shrinkwrap.json or yarn.lock) in the repository root, and uses its
+          # hash as a part of the cache key.
+          # https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#caching-packages-data
+          cache-dependency-path: 'package-lock.json'
+      
+      - name: Package
+        run: npm ci
+      
+      # Builds repo and create string output of hugo
+      - name: Build
+        id: build-and-output
+        run: |
+          HUGO_BUILD=$(hugo --gc --minify)
+          URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com"
+
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "Validate static website at $URL" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```bash' >> $GITHUB_OUTPUT
+          echo "$HUGO_BUILD" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
+      
+      # Publish Hugo Output as task summary
+      - name: Publish Hugo Output to Task Summary
+        env:
+          SUMMARY: ${{ steps.build-and-output.outputs.summary }}
+        run: |
+          echo "$SUMMARY" >> $GITHUB_STEP_SUMMARY
+      
+      # If this is a PR post the changes
+      - name: Push Hugo Output to PR
+        if: github.ref != 'refs/heads/main'
+        uses: actions/github-script@v6
+        env:
+          SUMMARY: "${{ steps.build-and-output.outputs.summary }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `${process.env.SUMMARY}`;
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+            })
+      
+      # Deploys built website to S3
+      - name: Deploy to S3 - DEV
+        if: github.ref == 'refs/heads/main'
+        run: hugo deploy --target=dev --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
