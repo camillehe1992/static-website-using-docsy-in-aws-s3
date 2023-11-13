@@ -237,4 +237,4 @@ enable = false
 [deployment]
 [[deployment.targets]]
 name = "aws"
-url = "s3://camille-s3-website"
+url = "s3://docsy-portal-prod"
