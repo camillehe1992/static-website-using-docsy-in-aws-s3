@@ -20,7 +20,7 @@ env:
   AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
   AWS_REGION: "${{ vars.AWS_REGION }}"
 
-  STATIC_BUCKET_NAME: camille-s3-website
+  STATIC_BUCKET_NAME: docsy-portal-prod
 
 jobs:
   build-and-deploy:
