@@ -57,7 +57,7 @@ jobs:
         id: build-and-output
         run: |
           HUGO_BUILD=$(hugo --gc --minify)
-          URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com"
+          URL="http://$STATIC_BUCKET_NAME.s3-website-$AWS_REGION.amazonaws.com.cn"
 
           delimiter="$(openssl rand -hex 8)"
           echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
